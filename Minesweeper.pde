@@ -6,12 +6,13 @@ private static int bombCount = 50;
 private MSButton[][] buttons = new MSButton[NUM_ROWS][NUM_COLS]; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines = new ArrayList<MSButton>(); //ArrayList of just the minesweeper buttons that are mined
 boolean firstClick = true;
-int colorVersion = 0;
-int maxColor = 2;
+private FlagButton fB;
+private FlagButton cB;
+
 
 void setup ()
 {
-    size(400, 400);
+    size(500, 500);
     textAlign(CENTER,CENTER);
     
     // make the manager
@@ -23,8 +24,8 @@ void setup ()
         buttons[r][c] = new MSButton(r,c);
       }
     }
-    
-    
+    fB = new FlagButton(410, 110, 80, 80);
+    cB = new FlagButton(410, 410, 80, 80);
     //setMines(5);
 }
 public void setMines(int cR, int cC)
@@ -42,16 +43,19 @@ public void setMines(int cR, int cC)
 public void draw ()
 {
     background( 0 );
+    textSize(50);
+    fill(59,20,18);
+    text("MINESWEEPER",0,0,500,100);
     if(isWon() == true)
         displayWinningMessage(8,6);
 }
 public void keyPressed(){
-  if(key == 'c'){
+  /*if(key == 'c'){
     colorVersion++;
     if(colorVersion > maxColor){
       colorVersion = 0;
     }
-  }
+  }*/
 }
 public boolean isWon()
 {
@@ -139,7 +143,7 @@ public class MSButton
         myRow = row;
         myCol = col; 
         x = myCol*width;
-        y = myRow*height;
+        y = myRow*height+100;
         myLabel = "";
         flagged = clicked = false;
         Interactive.add( this ); // register it with the manager
@@ -148,7 +152,14 @@ public class MSButton
     // called by manager
     public void mousePressed () 
     {
-      if(mouseButton == LEFT){
+       if(mouseButton == RIGHT || fB.isFlagging()){
+        if(!clicked){
+          flagged = !flagged;
+          if(!flagged){
+            clicked = false;
+          }
+        }
+      } else if(mouseButton == LEFT){
         if(firstClick){
           setMines(myRow,myCol);
           firstClick = false;
@@ -167,18 +178,11 @@ public class MSButton
             }
           }
         }
-      } else if(mouseButton == RIGHT){
-        if(!clicked){
-          flagged = !flagged;
-          if(!flagged){
-            clicked = false;
-          }
-        }
       }
     }
     public void draw () 
     {
-      if(colorVersion == 0){
+      /*if(colorVersion == 0){
         if (flagged)
             fill(0);
         else if(clicked && mines.contains(this)) 
@@ -200,7 +204,7 @@ public class MSButton
         else 
         //Light Blue
             fill(#a2d5c6);
-      } else if(colorVersion == 2){
+      } else if(colorVersion == 2){*/
         if (flagged)
         //Pink
             fill(238,45,123);    
@@ -213,9 +217,10 @@ public class MSButton
         else 
         //Brown
             fill(59,20,18);
-      }
+      //}
       rect(x, y, width, height);
       fill(0);
+      textSize(10);
       text(myLabel,x+width/2,y+height/2);
     }
     public void setLabel(String newLabel)
@@ -235,5 +240,82 @@ public class MSButton
     }
     public boolean isClicked(){
       return clicked;
+    }
+}
+public class FlagButton {
+    protected float x,y, width, height;
+    protected boolean flagging;
+    protected String myLabel;
+    
+    public FlagButton (int mx, int my, int mW, int mH)
+    {
+        width = mW;
+        height = mH;
+        x = mx;
+        y = my;
+        flagging = false;
+        myLabel = "";
+        Interactive.add( this ); // register it with the manager
+    }
+
+    // called by manager
+    public void mousePressed () 
+    {
+      if(mouseButton == LEFT)
+        flagging = !flagging;
+    }
+    public void draw () 
+    {
+      if (flagging){
+        //Pink
+          fill(238,45,123);
+      }           
+      else {
+        //Beije
+          fill(190,147,117);
+      }
+      rect(x, y, width, height);
+      fill(0);
+      if(flagging){
+        setLabel("Uncover");
+      } else {
+        setLabel("Flag");
+      }
+      textSize(20);
+      text(myLabel,x+width/2,y+height/2);
+    }
+    public void setLabel(String newLabel)
+    {
+        myLabel = newLabel;
+    }
+    public void setLabel(int newLabel)
+    {
+        myLabel = ""+ newLabel;
+    }
+    public String getLabel(){
+      return myLabel;
+    }
+    public boolean isFlagging()
+    {
+        return flagging;
+    }
+}
+class ColorButton extends FlagButton{
+  private int colorVersion = 0;
+  private int maxColor = 2;
+  public ColorButton(int mx, int my, int mW, int mH){
+    super(mx, my, mW, mH);
+  }
+  public void draw () 
+    {
+      if (colorVersion == 0){
+        //Pink
+          fill(238,45,123);
+      }           
+      else if(colorVersion == 1){
+        //Beije
+          fill(190,147,117);
+      }
+      rect(x, y, width, height);
     }
 }
