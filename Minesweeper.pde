@@ -6,13 +6,14 @@ private static int bombCount = 50;
 private MSButton[][] buttons = new MSButton[NUM_ROWS][NUM_COLS]; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines = new ArrayList<MSButton>(); //ArrayList of just the minesweeper buttons that are mined
 boolean firstClick = true;
-private FlagButton fB;
-private FlagButton cB;
+boolean flagging = false;
+MyButton flagButton;
+MyButton uncoverButton;
 
 
 void setup ()
 {
-    size(500, 500);
+    size(400, 500);
     textAlign(CENTER,CENTER);
     
     // make the manager
@@ -24,9 +25,8 @@ void setup ()
         buttons[r][c] = new MSButton(r,c);
       }
     }
-    fB = new FlagButton(410, 110, 80, 80);
-    cB = new FlagButton(410, 410, 80, 80);
-    //setMines(5);
+    uncoverButton = new MyButton(0,400,200,100,"Uncover",false, color(190,147,117));
+    flagButton = new MyButton(200,400,200,100,"Flag",true, color(238,45,123));
 }
 public void setMines(int cR, int cC)
 {
@@ -43,20 +43,10 @@ public void setMines(int cR, int cC)
 public void draw ()
 {
     background( 0 );
-    textSize(50);
-    fill(59,20,18);
-    text("MINESWEEPER",0,0,500,100);
     if(isWon() == true)
         displayWinningMessage(8,6);
 }
-public void keyPressed(){
-  /*if(key == 'c'){
-    colorVersion++;
-    if(colorVersion > maxColor){
-      colorVersion = 0;
-    }
-  }*/
-}
+
 public boolean isWon()
 {
     for(int i = 0; i < buttons.length; i++){
@@ -79,7 +69,7 @@ public void displayLosingMessage(int r, int c)
   String message = "You lose";
   for(int i = 0; i < message.length(); i++){
     buttons[r][c+i].clicked = false;
-    buttons[r][c+i].flagged = false;
+    buttons[r][c+i].flagged = true;
     buttons[r][c+i].setLabel(message.substring(i,i+1));
   }
 }
@@ -91,7 +81,7 @@ public void displayWinningMessage(int r, int c)
   }
   for(int i = 0; i < message.length(); i++){
     buttons[r][c+i].clicked = false;
-    buttons[r][c+i].flagged = false;
+    buttons[r][c+i].flagged = true;
     buttons[r][c+i].setLabel(message.substring(i,i+1));
   }
 }
@@ -119,7 +109,6 @@ public ArrayList<MSButton> returnValidNeighbours(int r, int c){
 }
 public int countMines(int row, int col)
 {
-  //Work to do
   int numMines = 0;
   ArrayList<MSButton> neighbours = returnValidNeighbours(row,col);
   for(int i = 0; i < neighbours.size(); i++){
@@ -143,7 +132,7 @@ public class MSButton
         myRow = row;
         myCol = col; 
         x = myCol*width;
-        y = myRow*height+100;
+        y = myRow*height;
         myLabel = "";
         flagged = clicked = false;
         Interactive.add( this ); // register it with the manager
@@ -152,7 +141,7 @@ public class MSButton
     // called by manager
     public void mousePressed () 
     {
-       if(mouseButton == RIGHT || fB.isFlagging()){
+       if(mouseButton == RIGHT || flagging){
         if(!clicked){
           flagged = !flagged;
           if(!flagged){
@@ -191,33 +180,19 @@ public class MSButton
             fill( 200 );
         else 
             fill( 100 );
-      } else if(colorVersion == 1){
-        if (flagged)
-        //Purple
-            fill(#5c3c92);    
-        else if(clicked && mines.contains(this)) 
-        //Red
-            fill(#d72631);
-        else if(clicked)
-        //Dark Blue
-            fill(#077b8a);
-        else 
-        //Light Blue
-            fill(#a2d5c6);
-      } else if(colorVersion == 2){*/
-        if (flagged)
-        //Pink
-            fill(238,45,123);    
-        else if(clicked && mines.contains(this)) 
-        //White
-            fill(255);
-        else if(clicked)
-        //Beije
-            fill(190,147,117);
-        else 
-        //Brown
-            fill(59,20,18);
-      //}
+      }*/
+      if (flagged)
+      //Pink
+          fill(238,45,123);    
+      else if(clicked && mines.contains(this)) 
+      //White
+          fill(255);
+      else if(clicked)
+      //Beije
+          fill(190,147,117);
+      else 
+      //Brown
+          fill(59,20,18);
       rect(x, y, width, height);
       fill(0);
       textSize(10);
@@ -242,80 +217,38 @@ public class MSButton
       return clicked;
     }
 }
-public class FlagButton {
-    protected float x,y, width, height;
-    protected boolean flagging;
-    protected String myLabel;
-    
-    public FlagButton (int mx, int my, int mW, int mH)
-    {
-        width = mW;
-        height = mH;
-        x = mx;
-        y = my;
-        flagging = false;
-        myLabel = "";
-        Interactive.add( this ); // register it with the manager
-    }
-
-    // called by manager
-    public void mousePressed () 
-    {
-      if(mouseButton == LEFT)
-        flagging = !flagging;
-    }
-    public void draw () 
-    {
-      if (flagging){
-        //Pink
-          fill(238,45,123);
-      }           
-      else {
-        //Beije
-          fill(190,147,117);
-      }
-      rect(x, y, width, height);
-      fill(0);
-      if(flagging){
-        setLabel("Uncover");
-      } else {
-        setLabel("Flag");
-      }
-      textSize(20);
-      text(myLabel,x+width/2,y+height/2);
-    }
-    public void setLabel(String newLabel)
-    {
-        myLabel = newLabel;
-    }
-    public void setLabel(int newLabel)
-    {
-        myLabel = ""+ newLabel;
-    }
-    public String getLabel(){
-      return myLabel;
-    }
-    public boolean isFlagging()
-    {
-        return flagging;
-    }
-}
-class ColorButton extends FlagButton{
-  private int colorVersion = 0;
-  private int maxColor = 2;
-  public ColorButton(int mx, int my, int mW, int mH){
-    super(mx, my, mW, mH);
+public class MyButton {
+  protected boolean clicked;
+  protected float x,y,width,height;
+  protected String myLabel;
+  private boolean myVal;
+  protected int myCol;
+  public MyButton(float mx, float my, float mW, float mH, String ml, boolean mV, int mC) {
+    width = mW;
+    height = mH;
+    x = mx;
+    y = my;
+    clicked = false;
+    myLabel = ml;
+    myVal = mV;
+    myCol = mC;
+    Interactive.add( this ); // register it with the manager
   }
-  public void draw () 
-    {
-      if (colorVersion == 0){
-        //Pink
-          fill(238,45,123);
-      }           
-      else if(colorVersion == 1){
-        //Beije
-          fill(190,147,117);
-      }
-      rect(x, y, width, height);
+  // called by manager
+  public void mousePressed () 
+  {
+    if(mouseButton == LEFT)
+      flagging = myVal;
+  }
+  public void draw(){
+    fill(myCol);
+    rect(x, y, width, height);
+    fill(0);
+    if(flagging == myVal){
+      textSize(30);
+    } else {
+      textSize(20);
     }
+    text(myLabel,x+width/2,y+height/2);
+  }
 }
