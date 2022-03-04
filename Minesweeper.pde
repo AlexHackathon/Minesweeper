@@ -9,6 +9,7 @@ boolean firstClick = true;
 boolean flagging = false;
 MyButton flagButton;
 MyButton uncoverButton;
+boolean finished = false;
 
 
 void setup ()
@@ -63,6 +64,7 @@ public boolean isWon()
 }
 public void displayLosingMessage(int r, int c)
 {
+  finished = true;
   for(MSButton b: mines){
     b.clicked = true;
   }
@@ -75,6 +77,7 @@ public void displayLosingMessage(int r, int c)
 }
 public void displayWinningMessage(int r, int c)
 {
+  finished = true;
   String message = "You Win!";
   for(MSButton b: mines){
     b.flagged = true;
@@ -141,6 +144,9 @@ public class MSButton
     // called by manager
     public void mousePressed () 
     {
+       if(finished){
+         return;
+       }
        if(mouseButton == RIGHT || flagging){
         if(!clicked){
           flagged = !flagged;
